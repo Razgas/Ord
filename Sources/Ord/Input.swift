@@ -189,13 +189,18 @@ enum ScreenShot {
 // MARK: - Screenshot text (OCR)
 
 enum ScreenText {
-    // macOS ties Screen Recording to the app's signature, so a rebuild can lose it.
-    // Ask, and open the right page of System Settings.
+    // macOS ties Screen Recording to the app's signature and ID, so a rebuild can lose it.
+    // macOS lists an app under Screen Recording only once it has tried to capture, so try first
+    // (that also brings up macOS's own prompt), then open the right page of System Settings.
     static func allowed() -> Bool {
         if CGPreflightScreenCaptureAccess() { return true }
         ordLog("screen recording: not allowed")
-        if !CGRequestScreenCaptureAccess() {
-            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
+        Task {
+            _ = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            if !CGRequestScreenCaptureAccess() {
+                try? await Task.sleep(nanoseconds: 600_000_000)
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
+            }
         }
         return false
     }
