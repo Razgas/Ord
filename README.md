@@ -1,14 +1,26 @@
+<p align="center"><img src="docs/logo.png" width="128" alt="Ord's icon"></p>
+
 # Ord
 
 A small, quiet dictionary for macOS, made for people learning a language. Choose the language you're learning and your own language in Settings; 44 languages are included. Danish ⇄ English has a specially tuned prompt.
 
 Type, select, point at or say a word, and Ord shows what it means: the translation, a second meaning, how the word is built, its base form and a memory trick. Sentences you write in the language you're learning are checked and corrected.
 
-- **Gemini** writes the explanation, in your own language, and decides by itself which way to translate.
+- **Gemini**, **ChatGPT** or **Claude**, whichever you choose, writes the explanation in your own language and decides by itself which way to translate.
 - **Google**, **Bing** and **DeepL** (with your own free key) give short second opinions underneath.
 - **Wiktionary** and the macOS **Dictionary** add meanings for single words.
 - Every service can be turned on or off in Settings.
 - Words and short sentences are **read aloud** with Google's natural voices.
+
+<p align="center"><img src="docs/lookup-word.png" width="640" alt="Looking up a Danish word: translation, parts, base form, a memory trick and examples"></p>
+
+Write a sentence in the language you're learning and Ord corrects it before it translates:
+
+<p align="center"><img src="docs/lookup-sentence.png" width="640" alt="A Danish sentence with a grammar mistake, corrected and explained word by word"></p>
+
+Press ⌥⇧S and drag over any part of the screen: the text is replaced by its translation, in place, like Google Lens.
+
+<p align="center"><img src="docs/in-place.png" alt="A Danish web page and the same page translated into English in place"></p>
 
 ## Ways to look something up
 
@@ -36,7 +48,7 @@ cd Ord
 
 On first launch Ord asks for:
 
-- **a Gemini API key**: free at [Google AI Studio](https://aistudio.google.com/apikey). It is stored only on your Mac.
+- **an API key** for the AI you choose: [Gemini](https://aistudio.google.com/apikey) (free), [ChatGPT](https://platform.openai.com/api-keys) or [Claude](https://platform.claude.com/settings/keys) (both paid per use; a ChatGPT or Claude subscription doesn't include API access). It is stored only on your Mac.
 - **Accessibility**: for reading the selected text and the word under the pointer.
 - **Microphone and Speech Recognition**: for ⌥A.
 - **Screen Recording**: for ⌥S.
@@ -51,12 +63,13 @@ SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" ./build.sh --install
 
 | File | What it does |
 |---|---|
-| `Translator.swift` | Gemini (streamed) and the lookup session, history |
+| `AI.swift` | Gemini, ChatGPT and Claude: models, keys and streamed answers |
+| `Translator.swift` | The lookup session and history |
 | `Services.swift` | Google, Bing, DeepL, Wiktionary and the macOS Dictionary |
 | `ScreenSelect.swift` | The screen-area picker for ⌥S and ⌥⇧S |
 | `ImageTranslate.swift` | ⌥⇧S: reads, translates and redraws the text of a screenshot, and the window that shows it |
 | `Languages.swift` | The supported languages and how each service names them |
-| `Prompt.swift` | The instructions Gemini follows, with fixed answer layouts |
+| `Prompt.swift` | The instructions the AI follows, with fixed answer layouts |
 | `Shortcuts.swift` | Shortcut recording and storage |
 | `Markdown.swift`, `Views.swift` | Turn those layouts into native SwiftUI rows |
 | `Panel.swift` | The Spotlight-style window, which never steals focus from the app you are in |
@@ -70,7 +83,7 @@ The three-finger click uses Apple's private MultitouchSupport framework, the sam
 
 Ord has no server and collects nothing. Your API keys, settings and history stay in your Mac's preferences. The text you look up is sent to the services you have turned on in Settings:
 
-- **Gemini** and **DeepL** through their official APIs, with your own keys.
+- **Gemini**, **ChatGPT**, **Claude** and **DeepL** through their official APIs, with your own keys.
 - **Google Translate**, **Bing Translator** and Google's read-aloud voices through the free endpoints their websites use. These are not official APIs, so they can stop working or be rate-limited at any time. Each can be turned off in Settings.
 - **Wiktionary** definitions are © Wiktionary contributors, under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 

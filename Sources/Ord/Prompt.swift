@@ -1,6 +1,6 @@
 import Foundation
 
-// Gemini instructions. Gemini decides the input language itself and answers in fixed Markdown layouts
+// The AI's instructions. The AI decides the input language itself and answers in fixed Markdown layouts
 // that AnswerView knows how to draw.
 let danishEnglishPrompt = #"""
 You are a Danish–English dictionary for an adult learning Danish for a language exam (level DU3).

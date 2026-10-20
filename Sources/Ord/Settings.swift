@@ -31,16 +31,10 @@ enum Pref {
     }
 
     static var d: UserDefaults { .standard }
-    static var key: String { d.string(forKey: geminiKey)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" }
-    static var model: String {
-        let m = d.string(forKey: geminiModel)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return m.isEmpty ? defaultModel : m
-    }
 }
 
 struct SettingsView: View {
-    @AppStorage(Pref.geminiKey) private var key = ""
-    @AppStorage(Pref.geminiModel) private var model = Pref.defaultModel
+    @AppStorage(Provider.pref) private var provider = Provider.gemini
     @AppStorage(Pref.autoSpeak) private var autoSpeak = true
     @AppStorage(Pref.threeFinger) private var threeFinger = true
     @AppStorage(Pref.learning) private var learning = "da"
@@ -84,18 +78,16 @@ struct SettingsView: View {
 
             Form {
                 Section {
-                    SecureField("API key", text: $key)
-                    ModelPicker(key: key, model: $model)
+                    Picker("Explanations by", selection: $provider) {
+                        ForEach(Provider.allCases) { Text($0.name).tag($0) }
+                    }
+                    AIKeyFields(provider: provider).id(provider)
                 } header: {
-                    Text("Gemini")
+                    Text("AI")
                 } footer: {
                     VStack(alignment: .leading, spacing: 4) {
-                        if key.isEmpty {
-                            Text("Ord needs your own Gemini API key. It is free and stays on this Mac.")
-                                .foregroundStyle(.secondary)
-                        }
-                        Link("Get a free API key at Google AI Studio",
-                             destination: URL(string: "https://aistudio.google.com/apikey")!)
+                        Text(provider.keyHint).foregroundStyle(.secondary)
+                        Link("Get an API key", destination: provider.keyPage)
                     }
                     .font(.footnote)
                 }
@@ -179,22 +171,30 @@ final class SettingsWindow {
     }
 }
 
-// The models come from Google for the key that is entered, so the list is always current.
-// Without a key, or when the list can't be fetched, the model name can still be typed.
-struct ModelPicker: View {
-    let key: String
-    @Binding var model: String
-    @State private var models: [Gemini.Model] = []
+// The key and model for one AI. The models come from the provider for the key that is entered, so the
+// list is always current. Without a key, or when the list can't be fetched, the model name can be typed.
+struct AIKeyFields: View {
+    let provider: Provider
+    @AppStorage private var key: String
+    @AppStorage private var model: String
+    @State private var models: [AI.Model] = []
     @State private var failed = false
 
+    init(provider: Provider) {
+        self.provider = provider
+        _key = AppStorage(wrappedValue: "", provider.keyPref)
+        _model = AppStorage(wrappedValue: provider.defaultModel, provider.modelPref)
+    }
+
     var body: some View {
+        SecureField("\(provider.name) API key", text: $key)
         Group {
             if failed || key.isEmpty {
                 TextField("Model", text: $model)
             } else {
                 Picker("Model", selection: $model) {
                     ForEach(models, id: \.id) { m in
-                        Text(m.id == Pref.defaultModel ? "\(m.name) (default)" : m.name).tag(m.id)
+                        Text(m.id == provider.defaultModel ? "\(m.name) (default)" : m.name).tag(m.id)
                     }
                     if !models.contains(where: { $0.id == model }) { Text(model).tag(model) }  // still loading, or not listed
                 }
@@ -204,7 +204,7 @@ struct ModelPicker: View {
             let k = key.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !k.isEmpty else { return }
             try? await Task.sleep(nanoseconds: 400_000_000)  // wait until the key is typed or pasted completely
-            do { models = try await Gemini.models(key: k); failed = models.isEmpty }
+            do { models = try await AI.models(provider, key: k); failed = models.isEmpty }
             catch { if !Task.isCancelled { failed = true } }
         }
     }

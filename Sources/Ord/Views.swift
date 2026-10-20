@@ -106,7 +106,7 @@ struct ResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if s.answer.isEmpty && s.loading.contains(.gemini) {
+            if s.answer.isEmpty && s.loading.contains(.ai) {
                 Placeholder()
             } else if !s.answer.isEmpty {
                 AnswerView(markdown: s.answer, target: s.source?.other)
@@ -353,13 +353,13 @@ struct IconButton: View {
     }
 }
 
-// Short answers from the other translators and dictionaries, under Gemini's explanation.
+// Short answers from the other translators and dictionaries, under the AI's explanation.
 struct ServiceRows: View {
     @EnvironmentObject var s: Session
 
     private var rows: [(Service, ServiceResult?)] {
         Service.enabled.compactMap { service in
-            guard service != .gemini else { return nil }
+            guard service != .ai else { return nil }
             // Dictionaries describe words of the language being learned only.
             if service.isDictionary && s.source != Language.learning { return nil }
             if let r = s.results[service] { return (service, r) }
@@ -371,7 +371,7 @@ struct ServiceRows: View {
         let rows = rows
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: 11) {
-                if !s.answer.isEmpty || s.error != nil || s.loading.contains(.gemini) {
+                if !s.answer.isEmpty || s.error != nil || s.loading.contains(.ai) {
                     Divider().opacity(0.5).padding(.bottom, 2)
                 }
                 ForEach(rows, id: \.0) { service, result in

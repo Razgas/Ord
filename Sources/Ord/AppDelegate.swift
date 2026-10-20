@@ -27,7 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !UserDefaults.standard.bool(forKey: "launchedBefore") {
             UserDefaults.standard.set(true, forKey: "launchedBefore")
             try? SMAppService.mainApp.register()
-            if Pref.key.isEmpty { SettingsWindow.shared.show() }
+            if Provider.current.key.isEmpty { SettingsWindow.shared.show() }
         }
     }
 

@@ -1,15 +1,16 @@
 import Foundation
 import CoreServices
 
-// Everything Ord can ask. Gemini gives the main explanation; the others are shown as short rows under it.
+// Everything Ord can ask. The AI gives the main explanation; the others are shown as short rows under it.
 enum Service: String, CaseIterable, Identifiable {
-    case gemini, google, bing, deepl, wiktionary, dictionary
+    case ai = "gemini"  // the AI chosen in Settings; the old name keeps the setting
+    case google, bing, deepl, wiktionary, dictionary
 
     var id: String { rawValue }
 
     var name: String {
         switch self {
-        case .gemini: return "Gemini"
+        case .ai: return Provider.current.name
         case .google: return "Google"
         case .bing: return "Bing"
         case .deepl: return "DeepL"
@@ -20,7 +21,7 @@ enum Service: String, CaseIterable, Identifiable {
 
     var detail: String {
         switch self {
-        case .gemini: return "Explanations, memory tricks and corrections"
+        case .ai: return "Explanations, memory tricks and corrections"
         case .google: return "Google Translate"
         case .bing: return "Microsoft Bing Translator"
         case .deepl: return "Needs a free DeepL API key"
@@ -66,7 +67,7 @@ typealias Call = (text: String, detected: String, more: [Sense])
 enum Translators {
     // Every translator detects the language itself: text in the language being learned goes into the user's
     // language, anything else into the language being learned.
-    // With `from` (Gemini's reading of the input) there is no guessing: one call in the right direction.
+    // With `from` (the AI's reading of the input) there is no guessing: one call in the right direction.
     static func translate(_ service: Service, _ text: String, from: Language? = nil) async throws -> Translation {
         let call: (Language, Language?) async throws -> Call
         switch service {

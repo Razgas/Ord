@@ -1,6 +1,6 @@
 import Foundation
 
-// Gemini answers in a few fixed Markdown layouts (see Prompt.swift). This turns them into blocks
+// The AI answers in a few fixed Markdown layouts (see Prompt.swift). This turns them into blocks
 // that AnswerView draws natively, instead of showing raw Markdown.
 enum Block: Equatable {
     case correction(String)                  // ✏️ Correct: … — reason
